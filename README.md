@@ -1,5 +1,5 @@
-# Product Name
-> Short blurb about what your product does.
+# Typescript Container (IOC)
+> Laravel (illuminate/container) and Angular inspired/based IoC container.
 
 [![NPM Version][npm-image]][npm-url]
 [![Build Status][travis-image]][travis-url]
