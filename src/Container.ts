@@ -1,7 +1,6 @@
 import '@babel/polyfill'
 import { isInstantiable } from './utils/isInstantiable'
-import { ContextualBindingBuilder } from './ContextualBindingBuilder';
-import { CONNREFUSED } from 'dns';
+import { ContextualBindingBuilder } from './ContextualBindingBuilder'
 
 export default class Container {
   private static instance: Container;
@@ -105,9 +104,9 @@ export default class Container {
     return this.getAlias(this.aliases[abstract])
   }
 
-  when(abstract) {
-    return new ContextualBindingBuilder(this, this.getAlias(abstract))
-  }
+  // when(abstract) {
+  //   return new ContextualBindingBuilder(this, this.getAlias(abstract))
+  // }
 
   resolveClass = (parameter) => {
     if (!isInstantiable(parameter)) {
@@ -200,10 +199,6 @@ export default class Container {
     return !!this.aliases[alias]
   }
 
-  unalias(alias) {
-    delete this.aliases[alias]
-  }
-
   alias(abstract, alias) {
     this.aliases[alias] = abstract
 
@@ -219,6 +214,10 @@ export default class Container {
   }
 
   addContextualBinding(concrete, abstract, implementation) {
+    if (!this.contextual[concrete]) {
+      this.contextual[concrete] = {}
+    }
+
     this.contextual[concrete][this.getAlias(abstract)] = implementation
   }
 

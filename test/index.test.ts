@@ -1,6 +1,9 @@
 import { expect } from 'chai'
 import SampleClass from './src/SampleClass'
 import SampleClass2 from './src/SampleClass2'
+import { SampleClass2 as SC2 } from './src/AnotherFeat/SampleClass2'
+import { SampleClass as ISC } from './src/AnotherFeat/ISampleClass'
+import { SampleClass1 as SC1 } from './src/AnotherFeat/SampleClass1'
 import { app, App2 } from './src/App'
 
 describe('prototype', () => {
@@ -49,4 +52,12 @@ describe('prototype', () => {
 
     expect(dummy.getClass1().getSC3().callSpecialDep(param)).to.be.eq(`${param} is called`)
   })
+
+  // it('should be able bind context', () => {
+  //   app.when(SC2).needs(ISC).provide(SC1)
+
+  //   let superClass = app.make(SC2)
+
+  //   expect(superClass.getDependency().callMe()).to.be.eq('called')
+  // })
 })

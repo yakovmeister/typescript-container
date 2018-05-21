@@ -30,26 +30,6 @@ var isInstantiable = function isInstantiable(Class) {
   return typeof Reflect.get(Class.prototype, 'constructor') === 'function';
 };
 
-var ContextualBindingBuilder =
-/** @class */
-function () {
-  function ContextualBindingBuilder(container, concrete) {
-    this.container = container;
-    this.concrete = concrete;
-  }
-
-  ContextualBindingBuilder.prototype.needs = function (abstract) {
-    this.abstract = abstract;
-    return this;
-  };
-
-  ContextualBindingBuilder.prototype.provide = function (implementation) {
-    this.container.addContextualBinding(this.concrete, this.abstract, implementation);
-  };
-
-  return ContextualBindingBuilder;
-}();
-
 var Container =
 /** @class */
 function () {
@@ -86,7 +66,10 @@ function () {
           }];
         }
       };
-    };
+    }; // when(abstract) {
+    //   return new ContextualBindingBuilder(this, this.getAlias(abstract))
+    // }
+
 
     this.resolveClass = function (parameter) {
       if (!isInstantiable(parameter)) {
@@ -129,9 +112,10 @@ function () {
 
       var params = _this.sortAndGetArguments(instance["inject__" + key + "_params"]);
 
-      new Proxy(instance[key], {
+      params = _this.resolveDependencies(params);
+      instance[key] = new Proxy(instance[key], {
         apply: function apply(target, args, argsList) {
-          return target.apply(void 0, params.concat(argsList));
+          return Reflect.apply(target, args, params.concat(argsList));
         }
       });
     });
@@ -162,10 +146,6 @@ function () {
     }
 
     return this.getAlias(this.aliases[abstract]);
-  };
-
-  Container.prototype.when = function (abstract) {
-    return new ContextualBindingBuilder(this, this.getAlias(abstract));
   };
 
   Container.prototype.build = function (concrete) {
@@ -245,10 +225,6 @@ function () {
     return !!this.aliases[alias];
   };
 
-  Container.prototype.unalias = function (alias) {
-    delete this.aliases[alias];
-  };
-
   Container.prototype.alias = function (abstract, alias) {
     this.aliases[alias] = abstract;
 
@@ -268,6 +244,10 @@ function () {
   };
 
   Container.prototype.addContextualBinding = function (concrete, abstract, implementation) {
+    if (!this.contextual[concrete]) {
+      this.contextual[concrete] = {};
+    }
+
     this.contextual[concrete][this.getAlias(abstract)] = implementation;
   };
 

@@ -1,4 +1,4 @@
-import Untitled from '../../src'
+import Untitled from '../../src/Container'
 
 export const app = Untitled.getInstance()
 

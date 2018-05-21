@@ -1,69 +1,86 @@
 # Typescript Container (IOC)
-> Laravel (illuminate/container) and Angular inspired/based IoC container.
+> Laravel (illuminate/container) inspired/based IoC container.
 
-[![NPM Version][npm-image]][npm-url]
+<!-- [![NPM Version][npm-image]][npm-url]
 [![Build Status][travis-image]][travis-url]
-[![Downloads Stats][npm-downloads]][npm-url]
+[![Downloads Stats][npm-downloads]][npm-url] -->
 
-One to two paragraph statement about your product and what it does.
-
-![](header.png)
+Nub Inversion of Control container highly based on / javascript port of illuminate/container from Laravel made for typescript.
 
 ## Installation
 
-OS X & Linux:
-
 ```sh
-npm install my-crazy-module --save
+npm i --save typescript-container
 ```
 
-Windows:
+## Known issues
 
-```sh
-edit autoexec.bat
-```
+* Contextual Bindings doesn't work just yet.
+* Every other stuffs aside from basic functionality.
 
-## Usage example
+## Basic Usage  
 
-A few motivating and useful examples of how your product can be used. Spice this up with code blocks and potentially more screenshots.
+You can start by requiring the ioc container then do your thing.
 
-_For more examples and usage, please refer to the [Wiki][wiki]._
+```javascript
+const Container = require('typescript-container')
+const WithDependencies = require('./src/WithDependencies')
+const Dependency = require('./src/Dependency')
 
-## Development setup
+const app = Container.getInstance()
 
-Describe how to install all development dependencies and how to run an automated test-suite of some kind. Potentially do this for multiple platforms.
+app.alias(Dependency, 'dependency')
 
-```sh
-make install
-npm test
-```
+const withDependencies = app.make(WithDependencies)
+
+withDependencies.doStuff()
+
+/********************************************/
+// ./src/WithDependencies
+const { Inject } = app
+
+class WithDependencies {
+  dep;
+
+  constructor(@Inject('dependencies') dep) {
+    this.dep = dep
+  }
+
+  doStuff() {
+    return this.dep.doSomething()
+  }
+}
+
+/********************************************/
+// ./src/Dependency
+class Dependency {
+  doSomething() {
+    return 'hello'
+  }
+}
+
+
+```  
+
+injecting dependencies to any other method also works.
+
 
 ## Release History
 
-* 0.2.1
-    * CHANGE: Update docs (module code remains unchanged)
-* 0.2.0
-    * CHANGE: Remove `setDefaultXYZ()`
-    * ADD: Add `init()`
-* 0.1.1
-    * FIX: Crash when calling `baz()` (Thanks @GenerousContributorName!)
-* 0.1.0
-    * The first proper release
-    * CHANGE: Rename `foo()` to `bar()`
-* 0.0.1
-    * Work in progress
+* 0.0.0-alpha.1
+  * basic functionality
 
 ## Meta
 
-Your Name – [@YourTwitter](https://twitter.com/dbader_org) – YourEmail@example.com
+Jacob Baring – [@yakovmeister](https://twitter.com/yakovmeister) – so@tfwno.gf
 
-Distributed under the XYZ license. See ``LICENSE`` for more information.
+Distributed under the MIT license. See ``LICENSE`` for more information.
 
-[https://github.com/yourname/github-link](https://github.com/dbader/)
+[https://github.com/yakovmeister/](https://github.com/yakovmeister/)
 
 ## Contributing
 
-1. Fork it (<https://github.com/yourname/yourproject/fork>)
+1. Fork it (<https://github.com/yakovmeister/typescript-container/fork>)
 2. Create your feature branch (`git checkout -b feature/fooBar`)
 3. Commit your changes (`git commit -am 'Add some fooBar'`)
 4. Push to the branch (`git push origin feature/fooBar`)

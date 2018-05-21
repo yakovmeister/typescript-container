@@ -1,4 +1,4 @@
-import Container from './'
+import Container from './Container'
 
 export class ContextualBindingBuilder {
 
