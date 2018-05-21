@@ -1,36 +1,11 @@
 "use strict";
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-/*! *****************************************************************************
-Copyright (c) Microsoft Corporation. All rights reserved.
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-this file except in compliance with the License. You may obtain a copy of the
-License at http://www.apache.org/licenses/LICENSE-2.0
-
-THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
-WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
-MERCHANTABLITY OR NON-INFRINGEMENT.
-
-See the Apache Version 2.0 License for specific language governing permissions
-and limitations under the License.
-***************************************************************************** */
-function __decorate(decorators, target, key, desc) {
-  var c = arguments.length,
-      r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc,
-      d;
-  if ((typeof Reflect === "undefined" ? "undefined" : _typeof(Reflect)) === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);else for (var i = decorators.length - 1; i >= 0; i--) {
-    if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-  }
-  return c > 3 && r && Object.defineProperty(target, key, r), r;
-}
-
-function __param(paramIndex, decorator) {
-  return function (target, key) {
-    decorator(target, key, paramIndex);
-  };
-}
 
 require("core-js/shim");
 
@@ -48,17 +23,53 @@ global._babelPolyfill = true;
  */
 
 var isInstantiable = function isInstantiable(Class) {
-  if (_typeof(Class) !== 'object') {
+  if (_typeof(Class.prototype) !== 'object') {
     return false;
   }
 
-  return typeof Reflect.get(Class, 'constructor')() === 'function';
+  return typeof Reflect.get(Class.prototype, 'constructor') === 'function';
 };
+
+var ContextualBindingBuilder =
+/** @class */
+function () {
+  function ContextualBindingBuilder(container, concrete) {
+    this.container = container;
+    this.concrete = concrete;
+  }
+
+  ContextualBindingBuilder.prototype.needs = function (abstract) {
+    this.abstract = abstract;
+    return this;
+  };
+
+  ContextualBindingBuilder.prototype.provide = function (implementation) {
+    this.container.addContextualBinding(this.concrete, this.abstract, implementation);
+  };
+
+  return ContextualBindingBuilder;
+}();
 
 var Container =
 /** @class */
 function () {
   function Container() {
+    var _this = this;
+
+    this.resolved = [];
+    this.bindings = [];
+    this.instances = [];
+    this.aliases = [];
+    this.buildStack = [];
+    this.abstractAliases = [];
+    this.contextual = [];
+    this["with"] = [];
+    /**
+     * Inject dependency.
+     * @param service
+     * @returns decorator
+     */
+
     this.Inject = function (service) {
       return function (target, name, idx) {
         var mdKey = "inject__" + (name ? name : 'constructor') + "_params";
@@ -77,101 +88,203 @@ function () {
       };
     };
 
-    this.Injectable = function (Class) {
-      return function () {
-        var args = [];
+    this.resolveClass = function (parameter) {
+      if (!isInstantiable(parameter)) {
+        throw new Error('...');
+      }
 
-        for (var _i = 0; _i < arguments.length; _i++) {
-          args[_i] = arguments[_i];
-        }
-
-        var key = "inject__constructor_params";
-        var arg = Class[key].sort(function (e) {
-          return e.index;
-        }).map(function (e) {
-          return e.value;
-        });
-        var constructed = Reflect.construct(Class, arg);
-        var prototypes = Object.getPrototypeOf(constructed);
-        Object.entries(prototypes).map(function (_a) {
-          var key = _a[0],
-              value = _a[1];
-
-          if (typeof value !== 'function') {
-            return;
-          }
-
-          var params = constructed["inject__" + key + "_params"].sort(function (e) {
-            return e.index;
-          }).map(function (e) {
-            return e.value;
-          });
-          constructed[key] = new Proxy(constructed[key], {
-            apply: function apply(target, args, argsList) {
-              return target.apply(void 0, params.concat(argsList));
-            }
-          });
-          delete constructed["inject__" + key + "_params"];
-          console.log('@c', constructed["inject__" + key + "_params"]);
-        }).filter(function (c) {
-          return c;
-        });
-        console.log(Object.getPrototypeOf(constructed));
-        return constructed;
-      };
+      return _this.make(parameter);
     };
   }
 
-  Container.prototype.resolve = function (service, params) {
-    if (params === void 0) {
-      params = [];
-    }
-
-    if (!isInstantiable(service)) ;
-    var constructed = Reflect.construct(service, []);
-    return constructed;
+  Container.prototype.isBuildable = function (concrete, abstract) {
+    return concrete === abstract || typeof concrete === 'function';
   };
 
-  Container.prototype.make = function (service, params) {
+  Container.prototype.getDependecies = function (concrete, key) {
+    return this.sortAndGetArguments(concrete[key]);
+  };
+
+  Container.prototype.resolveDependencies = function (dependencies) {
+    return dependencies.map(this.resolveClass);
+  };
+  /**
+   * iterate through each methods and inject dependencies via proxy
+   * @param instance instantiated class
+   * @returns fully dependency injected instantiated class
+   */
+
+
+  Container.prototype.injectMethodsDependecies = function (instance) {
+    var _this = this;
+
+    var protos = Object.getPrototypeOf(instance);
+    Object.entries(protos).forEach(function (_a) {
+      var key = _a[0],
+          value = _a[1];
+
+      if (typeof value !== 'function') {
+        return;
+      }
+
+      var params = _this.sortAndGetArguments(instance["inject__" + key + "_params"]);
+
+      new Proxy(instance[key], {
+        apply: function apply(target, args, argsList) {
+          return target.apply(void 0, params.concat(argsList));
+        }
+      });
+    });
+    return instance;
+  };
+  /**
+   * sorts and returns value created by Inject decorator
+   * @param args arguments from Inject decorator
+   * @returns array
+   */
+
+
+  Container.prototype.sortAndGetArguments = function (args) {
+    return Array.isArray(args) ? args.sort(function (arg) {
+      return arg.index;
+    }).map(function (element) {
+      return element.value;
+    }) : [];
+  };
+
+  Container.prototype.getAlias = function (abstract) {
+    if (!this.aliases[abstract]) {
+      return abstract;
+    }
+
+    if (this.aliases[abstract] === abstract) {
+      throw new Error("[" + abstract + "] is aliased on it's own.");
+    }
+
+    return this.getAlias(this.aliases[abstract]);
+  };
+
+  Container.prototype.when = function (abstract) {
+    return new ContextualBindingBuilder(this, this.getAlias(abstract));
+  };
+
+  Container.prototype.build = function (concrete) {
+    if (!isInstantiable(concrete)) {
+      return;
+    }
+
+    var dependencies = this.getDependecies(concrete, 'inject__constructor_params');
+    dependencies = this.resolveDependencies(dependencies);
+    var newInstance = Reflect.construct(concrete, dependencies);
+    newInstance = this.injectMethodsDependecies(newInstance);
+    return newInstance;
+  };
+
+  Container.prototype.resolve = function (abstract, params) {
     if (params === void 0) {
       params = [];
     }
 
-    return this.resolve(service, params);
+    abstract = this.getAlias(abstract);
+    var needsContextualBuild = !!params || !!this.getContextualConcrete(abstract);
+
+    if (!!this.instances[abstract] && !needsContextualBuild) {
+      return this.instances[abstract];
+    }
+
+    this["with"].push(params);
+    var concrete = this.getConcrete(abstract);
+    var obj = this.isBuildable(concrete, abstract) ? this.build(concrete) : this.make(concrete);
+    this["with"].pop();
+    return obj;
+  };
+
+  Container.prototype.getConcrete = function (abstract) {
+    var concrete = this.getContextualConcrete(abstract);
+
+    if (!!concrete) {
+      return concrete;
+    }
+
+    if (!!this.bindings[abstract]) {
+      return this.bindings[abstract]['concrete'];
+    }
+
+    return abstract;
+  };
+
+  Container.prototype.getContextualConcrete = function (abstract) {
+    var _this = this;
+
+    var binding = this.findInContextualBindings(abstract);
+
+    if (!!binding) {
+      return binding;
+    }
+
+    if (!this.abstractAliases[abstract]) {
+      return;
+    }
+
+    return this.abstractAliases[abstract].forEach(function (alias) {
+      var binding = _this.findInContextualBindings(alias);
+
+      if (!!binding) {
+        return binding;
+      }
+    });
+  };
+
+  Container.prototype.findInContextualBindings = function (abstract) {
+    if (this.contextual[this.buildStack.length - 1] && this.contextual[this.buildStack.length - 1][abstract]) {
+      return this.contextual[this.buildStack.length - 1][abstract];
+    }
+  };
+
+  Container.prototype.isAlias = function (alias) {
+    return !!this.aliases[alias];
+  };
+
+  Container.prototype.unalias = function (alias) {
+    delete this.aliases[alias];
+  };
+
+  Container.prototype.alias = function (abstract, alias) {
+    this.aliases[alias] = abstract;
+
+    if (!Array.isArray(this.abstractAliases[abstract])) {
+      this.abstractAliases[abstract] = [];
+    }
+
+    this.abstractAliases[abstract].push(alias);
+  };
+
+  Container.prototype.make = function (abstract, params) {
+    if (params === void 0) {
+      params = [];
+    }
+
+    return this.resolve(abstract);
+  };
+
+  Container.prototype.addContextualBinding = function (concrete, abstract, implementation) {
+    this.contextual[concrete][this.getAlias(abstract)] = implementation;
   };
 
   Container.getInstance = function () {
-    return Container.instance ? Container.instance : Container.instance = new Container();
+    if (!Container.instance) {
+      Container.instance = new Container();
+    }
+
+    return Container.instance;
+  };
+
+  Container.setInstance = function (container) {
+    Container.instance = container;
   };
 
   return Container;
 }();
 
-var app = Container.getInstance();
-var Injectable = app.Injectable,
-    Inject = app.Inject;
-
-var Sample =
-/** @class */
-function () {
-  function Sample(x, y) {
-    console.log('@params', x, y);
-  }
-
-  Sample.prototype.anotherone = function (x, y, z) {
-    console.log(x, y, z);
-  };
-
-  Sample.prototype.secondMethod = function (x) {};
-
-  __decorate([__param(0, Inject('fff'))], Sample.prototype, "anotherone");
-
-  __decorate([__param(0, Inject('a'))], Sample.prototype, "secondMethod");
-
-  Sample = __decorate([Injectable, __param(0, Inject('aww')), __param(1, Inject('world'))], Sample);
-  return Sample;
-}();
-
-var x = app.make(Sample);
-x.anotherone('supplied_param1', 'supplied_param2');
-console.log(Object.getPrototypeOf(x));
+var _default = Container;
+exports.default = _default;

@@ -8,8 +8,6 @@ export default class Container {
 
   private resolved: Array<any> = [];
 
-  private services: Array<any> = [];
-
   private bindings: Array<any> = [];
 
   private instances: Array<any> = [];
@@ -53,22 +51,29 @@ export default class Container {
     return dependencies.map(this.resolveClass)
   }
 
+  /**
+   * iterate through each methods and inject dependencies via proxy
+   * @param instance instantiated class
+   * @returns fully dependency injected instantiated class
+   */
   injectMethodsDependecies(instance) {
     const protos = Object.getPrototypeOf(instance)
+
     Object.entries(protos)
       .forEach(([key, value]) => {
         if (typeof value !== 'function') {
           return
         }
 
-        const params = this.sortAndGetArguments(
+        let params = this.sortAndGetArguments(
           instance[`inject__${key}_params`]
         )
 
-        // resolve params
-        new Proxy(instance[key], {
+        params = this.resolveDependencies(params)
+
+        instance[key] = new Proxy(instance[key], {
           apply: (target, args, argsList) => {
-            return target(...[...params, ...argsList])
+            return Reflect.apply(target, args, [...params, ...argsList])
           }
         })
       })
@@ -76,6 +81,11 @@ export default class Container {
       return instance
   }
 
+  /**
+   * sorts and returns value created by Inject decorator
+   * @param args arguments from Inject decorator
+   * @returns array
+   */
   sortAndGetArguments(args: Array<any>) {
     return Array.isArray(args)
       ? args.sort(arg => arg.index)
@@ -89,7 +99,7 @@ export default class Container {
     }
 
     if (this.aliases[abstract] === abstract) {
-      throw new Error('Alias cannot be the same with actual object.')
+      throw new Error(`[${abstract}] is aliased on it's own.`)
     }
 
     return this.getAlias(this.aliases[abstract])
@@ -161,7 +171,7 @@ export default class Container {
 
   getContextualConcrete(abstract) {
     let binding = this.findInContextualBindings(abstract)
-    
+  
     if (!!binding) {
       return binding
     }
@@ -188,6 +198,10 @@ export default class Container {
 
   isAlias(alias) {
     return !!this.aliases[alias]
+  }
+
+  unalias(alias) {
+    delete this.aliases[alias]
   }
 
   alias(abstract, alias) {
