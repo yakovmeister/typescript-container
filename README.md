@@ -42,7 +42,7 @@ const { Inject } = app
 class WithDependencies {
   dep;
 
-  constructor(@Inject('dependencies') dep) {
+  constructor(@Inject('dependency') dep) {
     this.dep = dep
   }
 
