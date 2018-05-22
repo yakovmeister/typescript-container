@@ -1,6 +1,4 @@
-import { app } from './App'
-
-const { Inject } = app
+import { app, Inject } from './App'
 
 export default class SpecialDep {
   constructor() { }

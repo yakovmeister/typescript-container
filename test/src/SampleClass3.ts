@@ -1,7 +1,5 @@
-import { app } from './App'
+import { app, Inject } from './App'
 import SpecialDep from './SpecialDep'
-
-const { Inject } = app
 
 export default class SampleClass3 {
   constructor() { }

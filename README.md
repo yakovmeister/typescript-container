@@ -1,11 +1,11 @@
 # Typescript Container (IOC)
 > Laravel (illuminate/container) inspired/based IoC container.
 
-<!-- [![NPM Version][npm-image]][npm-url]
-[![Build Status][travis-image]][travis-url]
-[![Downloads Stats][npm-downloads]][npm-url] -->
+[![NPM Version][npm-image]][npm-url]
+<!--[![Build Status][travis-image]][travis-url] -->
+[![Downloads Stats][npm-downloads]][npm-url] 
 
-Nub Inversion of Control container highly based on / javascript port of illuminate/container from Laravel made for typescript.
+Nub Inversion of Control container highly based on illuminate/container from Laravel. You can think of it as a port of illuminate/container to typescript, however, there's no guarantee that everything would work as it should. This module was designed for typescript and thus I cannot guarantee compatibility with ES6 alone.
 
 ## Installation
 
@@ -67,6 +67,8 @@ injecting dependencies to any other method also works.
 
 ## Release History
 
+* 0.0.0-alpha.2
+  * basic contextual binding added
 * 0.0.0-alpha.1
   * basic functionality
 
@@ -87,9 +89,9 @@ Distributed under the MIT license. See ``LICENSE`` for more information.
 5. Create a new Pull Request
 
 <!-- Markdown link & img dfn's -->
-[npm-image]: https://img.shields.io/npm/v/datadog-metrics.svg?style=flat-square
-[npm-url]: https://npmjs.org/package/datadog-metrics
-[npm-downloads]: https://img.shields.io/npm/dm/datadog-metrics.svg?style=flat-square
+[npm-image]: https://img.shields.io/npm/v/typescript-container.svg?style=flat-square
+[npm-url]: https://npmjs.org/package/typescript-container
+[npm-downloads]: https://img.shields.io/npm/dm/typescript-container.svg?style=flat-square
 [travis-image]: https://img.shields.io/travis/dbader/node-datadog-metrics/master.svg?style=flat-square
 [travis-url]: https://travis-ci.org/dbader/node-datadog-metrics
 [wiki]: https://github.com/yourname/yourproject/wiki

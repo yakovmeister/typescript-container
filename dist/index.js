@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = void 0;
+exports.Inject = exports.default = void 0;
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -30,6 +30,30 @@ var isInstantiable = function isInstantiable(Class) {
   return typeof Reflect.get(Class.prototype, 'constructor') === 'function';
 };
 
+var ContextualBindingBuilder =
+/** @class */
+function () {
+  function ContextualBindingBuilder(container, concrete) {
+    this.container = container;
+    this.concrete = concrete;
+  }
+
+  ContextualBindingBuilder.prototype.needs = function (abstract) {
+    this.abstract = abstract;
+    return this;
+  };
+
+  ContextualBindingBuilder.prototype.provide = function (implementation) {
+    this.container.addContextualBinding(this.concrete, this.abstract, implementation);
+  };
+
+  return ContextualBindingBuilder;
+}();
+
+var end = function end(array) {
+  return array[array.length - 1];
+};
+
 var Container =
 /** @class */
 function () {
@@ -44,36 +68,10 @@ function () {
     this.abstractAliases = [];
     this.contextual = [];
     this["with"] = [];
-    /**
-     * Inject dependency.
-     * @param service
-     * @returns decorator
-     */
-
-    this.Inject = function (service) {
-      return function (target, name, idx) {
-        var mdKey = "inject__" + (name ? name : 'constructor') + "_params";
-
-        if (Array.isArray(target[mdKey])) {
-          target[mdKey].push({
-            index: idx,
-            value: service
-          });
-        } else {
-          target[mdKey] = [{
-            index: idx,
-            value: service
-          }];
-        }
-      };
-    }; // when(abstract) {
-    //   return new ContextualBindingBuilder(this, this.getAlias(abstract))
-    // }
-
 
     this.resolveClass = function (parameter) {
       if (!isInstantiable(parameter)) {
-        throw new Error('...');
+        throw new Error("Unable to instantiate [" + parameter + "]");
       }
 
       return _this.make(parameter);
@@ -148,15 +146,21 @@ function () {
     return this.getAlias(this.aliases[abstract]);
   };
 
+  Container.prototype.when = function (abstract) {
+    return new ContextualBindingBuilder(this, this.getAlias(abstract));
+  };
+
   Container.prototype.build = function (concrete) {
     if (!isInstantiable(concrete)) {
       return;
     }
 
+    this.buildStack.push(concrete);
     var dependencies = this.getDependecies(concrete, 'inject__constructor_params');
     dependencies = this.resolveDependencies(dependencies);
     var newInstance = Reflect.construct(concrete, dependencies);
     newInstance = this.injectMethodsDependecies(newInstance);
+    this.buildStack.pop();
     return newInstance;
   };
 
@@ -216,8 +220,8 @@ function () {
   };
 
   Container.prototype.findInContextualBindings = function (abstract) {
-    if (this.contextual[this.buildStack.length - 1] && this.contextual[this.buildStack.length - 1][abstract]) {
-      return this.contextual[this.buildStack.length - 1][abstract];
+    if (this.contextual[end(this.buildStack)] && this.contextual[end(this.buildStack)][abstract]) {
+      return this.contextual[end(this.buildStack)][abstract];
     }
   };
 
@@ -265,6 +269,31 @@ function () {
 
   return Container;
 }();
+/**
+ * Inject dependency.
+ * @param service
+ * @returns decorator
+ */
 
+
+var Inject = function Inject(service) {
+  return function (target, name, idx) {
+    var mdKey = "inject__" + (name ? name : 'constructor') + "_params";
+
+    if (Array.isArray(target[mdKey])) {
+      target[mdKey].push({
+        index: idx,
+        value: service
+      });
+    } else {
+      target[mdKey] = [{
+        index: idx,
+        value: service
+      }];
+    }
+  };
+};
+
+exports.Inject = Inject;
 var _default = Container;
 exports.default = _default;

@@ -1,7 +1,5 @@
-import { app } from './App'
+import { app, Inject } from './App'
 import SampleClass from './SampleClass'
-
-const { Inject } = app
 
 export default class SampleClass2 {
   private sampleClass1: SampleClass;

@@ -1,6 +1,7 @@
 import '@babel/polyfill'
 import { isInstantiable } from './utils/isInstantiable'
 import { ContextualBindingBuilder } from './ContextualBindingBuilder'
+import { end } from './utils/end'
 
 export default class Container {
   private static instance: Container;
@@ -20,23 +21,6 @@ export default class Container {
   private contextual: Array<any> = [];
 
   private with: Array<any> = [];
-
-  /**
-   * Inject dependency.
-   * @param service 
-   * @returns decorator
-   */
-  Inject = (service) : any => {
-    return (target, name, idx) => {
-      const mdKey = `inject__${ name ? name : 'constructor'}_params`
-
-      if (Array.isArray(target[mdKey])) {
-        target[mdKey].push({ index: idx, value: service })
-      } else {
-        target[mdKey] = [{ index: idx, value: service }]
-      }
-    }
-  }
 
   protected isBuildable(concrete, abstract ?: any) {
     return concrete === abstract || typeof concrete === 'function'
@@ -104,13 +88,13 @@ export default class Container {
     return this.getAlias(this.aliases[abstract])
   }
 
-  // when(abstract) {
-  //   return new ContextualBindingBuilder(this, this.getAlias(abstract))
-  // }
+  when(abstract) {
+    return new ContextualBindingBuilder(this, this.getAlias(abstract))
+  }
 
   resolveClass = (parameter) => {
     if (!isInstantiable(parameter)) {
-      throw new Error('...')
+      throw new Error(`Unable to instantiate [${parameter}]`)
     }
 
     return this.make(parameter)
@@ -121,6 +105,8 @@ export default class Container {
       return
     }
 
+    this.buildStack.push(concrete)
+
     let dependencies = this.getDependecies(concrete, 'inject__constructor_params')
 
     dependencies = this.resolveDependencies(dependencies)
@@ -128,6 +114,8 @@ export default class Container {
     let newInstance = Reflect.construct(concrete, dependencies)
 
     newInstance = this.injectMethodsDependecies(newInstance)
+
+    this.buildStack.pop()
 
     return newInstance
   }
@@ -145,7 +133,7 @@ export default class Container {
 
     const concrete = this.getConcrete(abstract)
 
-    let obj = this.isBuildable(concrete, abstract) 
+    let obj = this.isBuildable(concrete, abstract)
       ? this.build(concrete)
       : this.make(concrete) 
 
@@ -189,9 +177,9 @@ export default class Container {
   }
 
   protected findInContextualBindings(abstract) {
-    if (this.contextual[this.buildStack.length - 1] 
-      && this.contextual[this.buildStack.length - 1][abstract]) {
-      return this.contextual[this.buildStack.length - 1][abstract]
+    if (this.contextual[end(this.buildStack)] 
+      && this.contextual[end(this.buildStack)][abstract]) {
+      return this.contextual[end(this.buildStack)][abstract]
     }
   }
 
@@ -217,7 +205,7 @@ export default class Container {
     if (!this.contextual[concrete]) {
       this.contextual[concrete] = {}
     }
-
+    
     this.contextual[concrete][this.getAlias(abstract)] = implementation
   }
 
@@ -231,5 +219,22 @@ export default class Container {
 
   static setInstance(container: Container) {
     Container.instance = container
+  }
+}
+
+/**
+ * Inject dependency.
+ * @param service 
+ * @returns decorator
+ */
+export const Inject = (service) : any => {
+  return (target, name, idx) => {
+    const mdKey = `inject__${ name ? name : 'constructor'}_params`
+
+    if (Array.isArray(target[mdKey])) {
+      target[mdKey].push({ index: idx, value: service })
+    } else {
+      target[mdKey] = [{ index: idx, value: service }]
+    }
   }
 }

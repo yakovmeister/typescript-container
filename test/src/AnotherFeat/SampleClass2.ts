@@ -1,7 +1,6 @@
 import { SampleClass } from './ISampleClass'
-import { app } from '../App'
+import { app, Inject } from '../App'
 
-const { Inject } = app
 
 export class SampleClass2 {
   private dependency;
