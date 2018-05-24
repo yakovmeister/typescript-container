@@ -60,4 +60,10 @@ describe('prototype', () => {
 
     expect(superClass.getDependency().callMe()).to.be.eq('called')
   })
+
+  it('should return an anonymous function that calls Container.prototype.make', () => {
+    const sampleClass = app.factory(SampleClass)
+
+    expect(sampleClass().callMe()).to.eq('called')
+  })
 })

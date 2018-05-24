@@ -6,7 +6,7 @@ import { end } from './utils/end'
 export default class Container {
   private static instance: Container;
 
-  private resolved: Array<any> = [];
+  private _resolved: Array<any> = [];
 
   private bindings: Array<any> = [];
 
@@ -199,6 +199,53 @@ export default class Container {
 
   make(abstract, params = []) {
     return this.resolve(abstract)
+  }
+
+  bind(abstract, concrete = null, shared = false) {
+    this.dropStaleInstances(abstract)
+
+    if (!concrete) {
+      concrete = abstract
+    }
+
+    this.bindings[abstract] = { concrete, shared }
+
+    if (this.resolved(abstract)) {
+      this.rebound(abstract)
+    }
+  }
+
+  rebound(abstract) {
+    this.make(abstract)
+  }
+
+  bound(abstract) {
+    return !!this.bindings[abstract] ||
+           !!this.instances[abstract] ||
+           this.isAlias(abstract)
+  }
+
+  isShared(abstract) {
+    return !!this.instances[abstract] || !!this.bindings[abstract].shared
+  }
+
+  resolved(abstract) {
+    if (this.isAlias(abstract)) {
+      var abstract = this.getAlias(abstract)  
+    }
+
+    return !!this._resolved[abstract] || !!this.instances[abstract]
+  }
+
+  dropStaleInstances(abstract) {
+    this.instances[abstract] = undefined
+    this.aliases[abstract] = undefined
+  }
+
+  factory(abstract) {
+    return (function(abstract) {
+      return this.make(abstract)
+    }).bind(this, abstract)
   }
 
   addContextualBinding(concrete, abstract, implementation) {

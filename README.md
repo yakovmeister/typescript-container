@@ -1,8 +1,8 @@
 # Typescript Container (IOC)
 > Laravel (illuminate/container) inspired/based IoC container.
 
-[![NPM Version][npm-image]][npm-url]
 <!--[![Build Status][travis-image]][travis-url] -->
+[![NPM Version][npm-image]][npm-url]
 [![Downloads Stats][npm-downloads]][npm-url] 
 
 Nub Inversion of Control container highly based on illuminate/container from Laravel. You can think of it as a port of illuminate/container to typescript, however, there's no guarantee that everything would work as it should. This module was designed for typescript and thus I cannot guarantee compatibility with ES6 alone.
@@ -15,8 +15,9 @@ npm i --save typescript-container
 
 ## Known issues
 
-* Contextual Bindings doesn't work just yet.
+* ~~Contextual Bindings doesn't work just yet.~~
 * Every other stuffs aside from basic functionality.
+* Primitive types as dependency
 
 ## Basic Usage  
 
@@ -24,6 +25,7 @@ You can start by requiring the ioc container then do your thing.
 
 ```javascript
 const Container = require('typescript-container')
+const Inject = Container.Inject
 const WithDependencies = require('./src/WithDependencies')
 const Dependency = require('./src/Dependency')
 
@@ -37,7 +39,7 @@ withDependencies.doStuff()
 
 /********************************************/
 // ./src/WithDependencies
-const { Inject } = app
+const Inject = require('typescript-container').Inject
 
 class WithDependencies {
   dep;
@@ -66,10 +68,11 @@ injecting dependencies to any other method also works.
 
 
 ## Release History
-
-* 0.0.0-alpha.2
+* 0.0.3
+  * added factory() and singleton()
+* 0.0.2
   * basic contextual binding added
-* 0.0.0-alpha.1
+* 0.0.1
   * basic functionality
 
 ## Meta

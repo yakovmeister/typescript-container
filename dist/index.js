@@ -60,7 +60,7 @@ function () {
   function Container() {
     var _this = this;
 
-    this.resolved = [];
+    this._resolved = [];
     this.bindings = [];
     this.instances = [];
     this.aliases = [];
@@ -245,6 +245,62 @@ function () {
     }
 
     return this.resolve(abstract);
+  };
+
+  Container.prototype.bind = function (abstract, concrete, shared) {
+    if (concrete === void 0) {
+      concrete = null;
+    }
+
+    if (shared === void 0) {
+      shared = false;
+    }
+
+    this.dropStaleInstances(abstract);
+
+    if (!concrete) {
+      concrete = abstract;
+    }
+
+    this.bindings[abstract] = {
+      concrete: concrete,
+      shared: shared
+    };
+
+    if (this.resolved(abstract)) {
+      this.rebound(abstract);
+    }
+  };
+
+  Container.prototype.rebound = function (abstract) {
+    this.make(abstract);
+  };
+
+  Container.prototype.bound = function (abstract) {
+    return !!this.bindings[abstract] || !!this.instances[abstract] || this.isAlias(abstract);
+  };
+
+  Container.prototype.isShared = function (abstract) {
+    return !!this.instances[abstract] || !!this.bindings[abstract].shared;
+  };
+
+  Container.prototype.resolved = function (abstract) {
+    if (this.isAlias(abstract)) {
+      var abstract = this.getAlias(abstract);
+    }
+
+    return !!this._resolved[abstract] || !!this.instances[abstract];
+  };
+
+  Container.prototype.dropStaleInstances = function (abstract) {
+    this.instances[abstract] = undefined;
+    this.aliases[abstract] = undefined;
+  };
+
+  Container.prototype.factory = function (abstract) {
+    return function (abstract) {
+      return this.make(abstract);
+    }.bind(this, abstract);
   };
 
   Container.prototype.addContextualBinding = function (concrete, abstract, implementation) {
