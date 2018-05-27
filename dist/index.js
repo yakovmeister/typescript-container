@@ -7,21 +7,11 @@ exports.Inject = exports.default = void 0;
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-require("core-js/shim");
-
-require("regenerator-runtime/runtime");
-
-if (global._babelPolyfill && typeof console !== "undefined" && console.warn) {
-  console.warn("@babel/polyfill is loaded more than once on this page. This is probably not desirable/intended " + "and may have consequences if different versions of the polyfills are applied sequentially. " + "If you do need to load the polyfill more than once, use @babel/polyfill/noConflict " + "instead to bypass the warning.");
-}
-
-global._babelPolyfill = true;
 /**
  * Check whether the given Object is instantiable.
  * @param Class Object.
  * @returns boolean
  */
-
 var isInstantiable = function isInstantiable(Class) {
   if (_typeof(Class.prototype) !== 'object') {
     return false;

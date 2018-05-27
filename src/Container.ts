@@ -1,4 +1,3 @@
-import '@babel/polyfill'
 import { isInstantiable } from './utils/isInstantiable'
 import { ContextualBindingBuilder } from './ContextualBindingBuilder'
 import { end } from './utils/end'
