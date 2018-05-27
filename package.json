@@ -1,8 +1,9 @@
 {
   "name": "typescript-container",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Laravel (illuminate/container) inspired/based IoC container.",
   "main": "dist/index.min.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "test": "nyc --check-coverage --lines 80 mocha -r ts-node/register test/**.test.ts",
     "rollup": "rollup -c",
