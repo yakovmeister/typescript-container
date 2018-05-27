@@ -5,7 +5,8 @@
         "es6",
         "es2017.object"
       ],
-      "experimentalDecorators": true
+      "experimentalDecorators": true,
+      "declaration": true
     },
     "exclude": [
       "node_modules"
