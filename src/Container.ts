@@ -4,22 +4,67 @@ import { ContextualBindingBuilder } from './ContextualBindingBuilder'
 import { end } from './utils/end'
 
 export default class Container {
+  /**
+   * The current globally available container (if any).
+   *
+   * @var static
+   */
   private static instance: Container;
 
+  /**
+   * An array of the types that have been resolved.
+   *
+   * @var array
+   */
   private _resolved: Array<any> = [];
 
+  /**
+   * The container's bindings.
+   *
+   * @var array
+   */
   private bindings: Array<any> = [];
 
+  /**
+   * The container's shared instances.
+   *
+   * @var array
+   */
   private instances: Array<any> = [];
 
+  /**
+   * The registered type aliases.
+   *
+   * @var array
+   */
   private aliases: Array<any> = [];
 
+  /**
+   * The stack of concretions currently being built.
+   *
+   * @var array
+   */
   private buildStack: Array<any> = [];
 
+  /**
+   * The registered aliases keyed by the abstract name.
+   *
+   * @var array
+   */
   private abstractAliases: Array<any> = [];
 
+  /**
+   * The contextual binding map.
+   *
+   * @var array
+   */
   private contextual: Array<any> = [];
 
+  /**
+   * The parameter override stack.
+   *
+   * @var array
+   */
   private with: Array<any> = [];
 
   protected isBuildable(concrete, abstract ?: any) {
@@ -48,8 +93,10 @@ export default class Container {
           return
         }
 
+        const paramKey = `inject__${key}_params`
+
         let params = this.sortAndGetArguments(
-          instance[`inject__${key}_params`]
+          instance[paramKey]
         )
 
         params = this.resolveDependencies(params)
@@ -59,6 +106,8 @@ export default class Container {
             return Reflect.apply(target, args, [...params, ...argsList])
           }
         })
+
+        delete instance[paramKey]
       })
 
       return instance
@@ -88,6 +137,12 @@ export default class Container {
     return this.getAlias(this.aliases[abstract])
   }
 
+  /**
+   * Define a contextual binding.
+   *
+   * @param  string  concrete
+   * @return ContextualBindingBuilder
+   */
   when(abstract) {
     return new ContextualBindingBuilder(this, this.getAlias(abstract))
   }
@@ -278,9 +333,23 @@ export default class Container {
     return !!this._resolved[abstract] || !!this.instances[abstract]
   }
 
+  /**
+   * Register a binding if it hasn't already been registered.
+   *
+   * @param  string  abstract
+   * @param  \Closure|string|null  concrete
+   * @param  bool  shared
+   * @return void
+   */
+  attachIf(abstract, concrete = null, shared = false) {
+    if (!this.bound(abstract)) {
+      this.attach(abstract, concrete, shared)
+    }
+  }
+
   dropStaleInstances(abstract) {
-    this.instances[abstract] = undefined
-    this.aliases[abstract] = undefined
+    delete this.instances[abstract]
+    delete this.aliases[abstract]
   }
 
   factory(abstract) {
@@ -308,6 +377,23 @@ export default class Container {
   static setInstance(container: Container) {
     Container.instance = container
   }
+
+  forgetInstance(abstract) {
+    delete this.instances[abstract]
+  }
+
+  forgetInstances() {
+    this.instances= []
+  }
+
+
+  flush() {
+    this.aliases = []
+    this._resolved = []
+    this.bindings = []
+    this.instances = []
+    this.abstractAliases = []
+  }
 }
 
 /**
@@ -315,14 +401,14 @@ export default class Container {
  * @param service 
  * @returns decorator
  */
-export const Inject = (service) : any => {
+export const Inject = (abstract) : any => {
   return (target, name, idx) => {
     const mdKey = `inject__${ name ? name : 'constructor'}_params`
 
     if (Array.isArray(target[mdKey])) {
-      target[mdKey].push({ index: idx, value: service })
+      target[mdKey].push({ index: idx, value: abstract })
     } else {
-      target[mdKey] = [{ index: idx, value: service }]
+      target[mdKey] = [{ index: idx, value: abstract }]
     }
   }
 }

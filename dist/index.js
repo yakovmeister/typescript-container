@@ -59,14 +59,62 @@ var Container =
 function () {
   function Container() {
     var _this = this;
+    /**
+     * An array of the types that have been resolved.
+     *
+     * @var array
+     */
+
 
     this._resolved = [];
+    /**
+     * The container's bindings.
+     *
+     * @var array
+     */
+
     this.bindings = [];
+    /**
+     * The container's shared instances.
+     *
+     * @var array
+     */
+
     this.instances = [];
+    /**
+     * The registered type aliases.
+     *
+     * @var array
+     */
+
     this.aliases = [];
+    /**
+     * The stack of concretions currently being built.
+     *
+     * @var array
+     */
+
     this.buildStack = [];
+    /**
+     * The registered aliases keyed by the abstract name.
+     *
+     * @var array
+     */
+
     this.abstractAliases = [];
+    /**
+     * The contextual binding map.
+     *
+     * @var array
+     */
+
     this.contextual = [];
+    /**
+     * The parameter override stack.
+     *
+     * @var array
+     */
+
     this["with"] = [];
 
     this.resolveClass = function (parameter) {
@@ -108,7 +156,9 @@ function () {
         return;
       }
 
-      var params = _this.sortAndGetArguments(instance["inject__" + key + "_params"]);
+      var paramKey = "inject__" + key + "_params";
+
+      var params = _this.sortAndGetArguments(instance[paramKey]);
 
       params = _this.resolveDependencies(params);
       instance[key] = new Proxy(instance[key], {
@@ -116,6 +166,7 @@ function () {
           return Reflect.apply(target, args, params.concat(argsList));
         }
       });
+      delete instance[paramKey];
     });
     return instance;
   };
@@ -145,6 +196,13 @@ function () {
 
     return this.getAlias(this.aliases[abstract]);
   };
+  /**
+   * Define a contextual binding.
+   *
+   * @param  string  concrete
+   * @return ContextualBindingBuilder
+   */
+
 
   Container.prototype.when = function (abstract) {
     return new ContextualBindingBuilder(this, this.getAlias(abstract));
@@ -334,10 +392,33 @@ function () {
 
     return !!this._resolved[abstract] || !!this.instances[abstract];
   };
+  /**
+   * Register a binding if it hasn't already been registered.
+   *
+   * @param  string  abstract
+   * @param  \Closure|string|null  concrete
+   * @param  bool  shared
+   * @return void
+   */
+
+
+  Container.prototype.attachIf = function (abstract, concrete, shared) {
+    if (concrete === void 0) {
+      concrete = null;
+    }
+
+    if (shared === void 0) {
+      shared = false;
+    }
+
+    if (!this.bound(abstract)) {
+      this.attach(abstract, concrete, shared);
+    }
+  };
 
   Container.prototype.dropStaleInstances = function (abstract) {
-    this.instances[abstract] = undefined;
-    this.aliases[abstract] = undefined;
+    delete this.instances[abstract];
+    delete this.aliases[abstract];
   };
 
   Container.prototype.factory = function (abstract) {
@@ -366,6 +447,22 @@ function () {
     Container.instance = container;
   };
 
+  Container.prototype.forgetInstance = function (abstract) {
+    delete this.instances[abstract];
+  };
+
+  Container.prototype.forgetInstances = function () {
+    this.instances = [];
+  };
+
+  Container.prototype.flush = function () {
+    this.aliases = [];
+    this._resolved = [];
+    this.bindings = [];
+    this.instances = [];
+    this.abstractAliases = [];
+  };
+
   return Container;
 }();
 /**
@@ -375,19 +472,19 @@ function () {
  */
 
 
-var Inject = function Inject(service) {
+var Inject = function Inject(abstract) {
   return function (target, name, idx) {
     var mdKey = "inject__" + (name ? name : 'constructor') + "_params";
 
     if (Array.isArray(target[mdKey])) {
       target[mdKey].push({
         index: idx,
-        value: service
+        value: abstract
       });
     } else {
       target[mdKey] = [{
         index: idx,
-        value: service
+        value: abstract
       }];
     }
   };
