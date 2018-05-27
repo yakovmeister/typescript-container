@@ -100,6 +100,36 @@ export default class Container {
     return this.make(parameter)
   }
 
+  removeAbstractAlias(searched) {
+    if (!this.aliases[searched]) {
+      return
+    }
+
+    this.abstractAliases.forEach((aliases, abstractIndex) => {
+      aliases.forEach((alias, index) => {
+        if (alias === searched) {
+          delete this.abstractAliases[abstractIndex][index]
+        }
+      })
+    })
+  }
+
+  instance(abstract, instance) {
+    this.removeAbstractAlias(abstract)
+
+    const isBound = this.bound(abstract)
+
+    delete this.aliases[abstract]
+
+    this.instances[abstract] = instance
+
+    if (isBound) {
+      this.rebound(abstract)
+    }
+
+    return instance
+  }
+
   build(concrete) {
     if (!isInstantiable(concrete)) {
       return
@@ -123,7 +153,7 @@ export default class Container {
   resolve(abstract, params = []) {
     abstract = this.getAlias(abstract)
 
-    const needsContextualBuild = !!params || !!this.getContextualConcrete(abstract)
+    const needsContextualBuild = !!params.length || !!this.getContextualConcrete(abstract)
 
     if (!!this.instances[abstract] && !needsContextualBuild) {
       return this.instances[abstract]
@@ -136,6 +166,12 @@ export default class Container {
     let obj = this.isBuildable(concrete, abstract)
       ? this.build(concrete)
       : this.make(concrete) 
+
+    if (this.isShared(abstract) && !needsContextualBuild) {
+      this.instances[abstract] = obj
+    }
+
+    this._resolved[abstract] = true
 
     this.with.pop()
 
@@ -201,7 +237,11 @@ export default class Container {
     return this.resolve(abstract)
   }
 
-  bind(abstract, concrete = null, shared = false) {
+  singleton(abstract, concrete = null) {
+    this.attach(abstract, concrete, true)
+  }
+
+  attach(abstract, concrete = null, shared = false) {
     this.dropStaleInstances(abstract)
 
     if (!concrete) {
@@ -226,7 +266,8 @@ export default class Container {
   }
 
   isShared(abstract) {
-    return !!this.instances[abstract] || !!this.bindings[abstract].shared
+    return !!this.instances[abstract] || (
+      !!this.bindings[abstract] && !!this.bindings[abstract].shared)
   }
 
   resolved(abstract) {

@@ -66,4 +66,14 @@ describe('prototype', () => {
 
     expect(sampleClass().callMe()).to.eq('called')
   })
+
+  it('should create a singleton instance.', () => {
+    app.singleton(SampleClass)
+
+    const class1 = app.make(SampleClass)
+    class1.setChangeMe('hello')
+    const class2 = app.make(SampleClass)
+
+    expect(class1.getChangeMe()).to.eq(class2.getChangeMe())
+  })
 })

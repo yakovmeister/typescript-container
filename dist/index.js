@@ -150,6 +150,35 @@ function () {
     return new ContextualBindingBuilder(this, this.getAlias(abstract));
   };
 
+  Container.prototype.removeAbstractAlias = function (searched) {
+    var _this = this;
+
+    if (!this.aliases[searched]) {
+      return;
+    }
+
+    this.abstractAliases.forEach(function (aliases, abstractIndex) {
+      aliases.forEach(function (alias, index) {
+        if (alias === searched) {
+          delete _this.abstractAliases[abstractIndex][index];
+        }
+      });
+    });
+  };
+
+  Container.prototype.instance = function (abstract, instance) {
+    this.removeAbstractAlias(abstract);
+    var isBound = this.bound(abstract);
+    delete this.aliases[abstract];
+    this.instances[abstract] = instance;
+
+    if (isBound) {
+      this.rebound(abstract);
+    }
+
+    return instance;
+  };
+
   Container.prototype.build = function (concrete) {
     if (!isInstantiable(concrete)) {
       return;
@@ -170,7 +199,7 @@ function () {
     }
 
     abstract = this.getAlias(abstract);
-    var needsContextualBuild = !!params || !!this.getContextualConcrete(abstract);
+    var needsContextualBuild = !!params.length || !!this.getContextualConcrete(abstract);
 
     if (!!this.instances[abstract] && !needsContextualBuild) {
       return this.instances[abstract];
@@ -179,6 +208,12 @@ function () {
     this["with"].push(params);
     var concrete = this.getConcrete(abstract);
     var obj = this.isBuildable(concrete, abstract) ? this.build(concrete) : this.make(concrete);
+
+    if (this.isShared(abstract) && !needsContextualBuild) {
+      this.instances[abstract] = obj;
+    }
+
+    this._resolved[abstract] = true;
     this["with"].pop();
     return obj;
   };
@@ -247,7 +282,15 @@ function () {
     return this.resolve(abstract);
   };
 
-  Container.prototype.bind = function (abstract, concrete, shared) {
+  Container.prototype.singleton = function (abstract, concrete) {
+    if (concrete === void 0) {
+      concrete = null;
+    }
+
+    this.attach(abstract, concrete, true);
+  };
+
+  Container.prototype.attach = function (abstract, concrete, shared) {
     if (concrete === void 0) {
       concrete = null;
     }
@@ -281,7 +324,7 @@ function () {
   };
 
   Container.prototype.isShared = function (abstract) {
-    return !!this.instances[abstract] || !!this.bindings[abstract].shared;
+    return !!this.instances[abstract] || !!this.bindings[abstract] && !!this.bindings[abstract].shared;
   };
 
   Container.prototype.resolved = function (abstract) {

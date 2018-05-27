@@ -1,7 +1,7 @@
 # Typescript Container (IOC)
-> Laravel (illuminate/container) inspired/based IoC container.
+> Kinda port of Laravel's illuminate/container to typescript.
 
-<!--[![Build Status][travis-image]][travis-url] -->
+[![Build Status][travis-image]][travis-url]
 [![NPM Version][npm-image]][npm-url]
 [![Downloads Stats][npm-downloads]][npm-url] 
 
@@ -13,11 +13,15 @@ Nub Inversion of Control container highly based on illuminate/container from Lar
 npm i --save typescript-container
 ```
 
-## Known issues
+## Known issues / Not working
 
 * ~~Contextual Bindings doesn't work just yet.~~
+* Storing arbitrary values
 * Every other stuffs aside from basic functionality.
 * Primitive types as dependency
+* tagging
+* overriding constructor parameters
+* callback supports
 
 ## Basic Usage  
 
@@ -95,6 +99,6 @@ Distributed under the MIT license. See ``LICENSE`` for more information.
 [npm-image]: https://img.shields.io/npm/v/typescript-container.svg?style=flat-square
 [npm-url]: https://npmjs.org/package/typescript-container
 [npm-downloads]: https://img.shields.io/npm/dm/typescript-container.svg?style=flat-square
-[travis-image]: https://img.shields.io/travis/dbader/node-datadog-metrics/master.svg?style=flat-square
-[travis-url]: https://travis-ci.org/dbader/node-datadog-metrics
+[travis-image]: https://travis-ci.org/yakovmeister/typescript-container.svg?branch=dev
+[travis-url]: https://travis-ci.org/yakovmeister/typescript-container
 [wiki]: https://github.com/yourname/yourproject/wiki
