@@ -1,4 +1,3 @@
-
 /**
  * Check whether the given Object is instantiable.
  * @param Class Object.

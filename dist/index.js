@@ -115,6 +115,14 @@ function () {
       return _this.make(parameter);
     };
   }
+  /**
+   * Determine if the given concrete is buildable.
+   *
+   * @param  mixed   concrete
+   * @param  string  abstract
+   * @return bool
+   */
+
 
   Container.prototype.isBuildable = function (concrete, abstract) {
     return concrete === abstract || typeof concrete === 'function';
@@ -130,7 +138,7 @@ function () {
   /**
    * iterate through each methods and inject dependencies via proxy
    * @param instance instantiated class
-   * @returns fully dependency injected instantiated class
+   * @return fully dependency injected instantiated class
    */
 
 
@@ -177,7 +185,7 @@ function () {
   /**
    * sorts and returns value created by Inject decorator
    * @param args arguments from Inject decorator
-   * @returns array
+   * @return array
    */
 
 
@@ -254,6 +262,14 @@ function () {
     this.buildStack.pop();
     return newInstance;
   };
+  /**
+   * Resolve the given type from the container.
+   *
+   * @param  string  abstract
+   * @param  array  parameters
+   * @return mixed
+   */
+
 
   Container.prototype.resolve = function (abstract, params) {
     if (params === void 0) {
@@ -279,6 +295,13 @@ function () {
     this["with"].pop();
     return obj;
   };
+  /**
+   * Get the concrete type for a given abstract.
+   *
+   * @param  string  abstract
+   * @return mixed   concrete
+   */
+
 
   Container.prototype.getConcrete = function (abstract) {
     var concrete = this.getContextualConcrete(abstract);
@@ -335,6 +358,14 @@ function () {
 
     this.abstractAliases[abstract].push(alias);
   };
+  /**
+   * Resolve the given type from the container.
+   *
+   * @param  string  abstract
+   * @param  array  parameters
+   * @return mixed
+   */
+
 
   Container.prototype.make = function (abstract, params) {
     if (params === void 0) {
@@ -395,6 +426,14 @@ function () {
     }
 
     return !!this._resolved[abstract] || !!this.instances[abstract];
+  };
+
+  Container.prototype.get = function (id) {
+    if (this.bound(id)) {
+      return this.resolve(id);
+    }
+
+    throw new Error('Entry not found');
   };
   /**
    * Register a binding if it hasn't already been registered.
@@ -483,9 +522,9 @@ function () {
   return Container;
 }();
 /**
- * Inject dependency.
- * @param service
- * @returns decorator
+ * Allows us to Inject Dependency as parameter in form of decorator.
+ * @param abstract dependency to be injected
+ * @returns callback
  */
 
 

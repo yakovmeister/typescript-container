@@ -54,13 +54,20 @@ export default class Container {
      * @var array
      */
     private with;
+    /**
+     * Determine if the given concrete is buildable.
+     *
+     * @param  mixed   concrete
+     * @param  string  abstract
+     * @return bool
+     */
     protected isBuildable(concrete: any, abstract?: any): boolean;
     getDependecies(concrete: any, key: any): any[];
     resolveDependencies(dependencies: Array<any>): any[];
     /**
      * iterate through each methods and inject dependencies via proxy
      * @param instance instantiated class
-     * @returns fully dependency injected instantiated class
+     * @return fully dependency injected instantiated class
      */
     injectMethodsDependecies(instance: any): any;
     iterateThroughMethods(prototype: any, callback: any): void;
@@ -69,7 +76,7 @@ export default class Container {
     /**
      * sorts and returns value created by Inject decorator
      * @param args arguments from Inject decorator
-     * @returns array
+     * @return array
      */
     sortAndGetArguments(args: Array<any>): any[];
     getAlias(abstract: string): any;
@@ -84,12 +91,32 @@ export default class Container {
     removeAbstractAlias(searched: any): void;
     instance(abstract: any, instance: any): any;
     build(concrete: any): any;
+    /**
+     * Resolve the given type from the container.
+     *
+     * @param  string  abstract
+     * @param  array  parameters
+     * @return mixed
+     */
     resolve(abstract: any, params?: any[]): any;
+    /**
+     * Get the concrete type for a given abstract.
+     *
+     * @param  string  abstract
+     * @return mixed   concrete
+     */
     getConcrete(abstract: any): any;
     getContextualConcrete(abstract: any): any;
     protected findInContextualBindings(abstract: any): any;
     isAlias(alias: any): boolean;
     alias(abstract: any, alias: any): void;
+    /**
+     * Resolve the given type from the container.
+     *
+     * @param  string  abstract
+     * @param  array  parameters
+     * @return mixed
+     */
     make(abstract: any, params?: any[]): any;
     singleton(abstract: any, concrete?: any): void;
     attach(abstract: any, concrete?: any, shared?: boolean): void;
@@ -97,6 +124,7 @@ export default class Container {
     bound(abstract: any): boolean;
     isShared(abstract: any): boolean;
     resolved(abstract: any): boolean;
+    get(id: any): any;
     /**
      * Register a binding if it hasn't already been registered.
      *
@@ -117,8 +145,8 @@ export default class Container {
     notInstantiable(concrete: any): void;
 }
 /**
- * Inject dependency.
- * @param service
- * @returns decorator
+ * Allows us to Inject Dependency as parameter in form of decorator.
+ * @param abstract dependency to be injected
+ * @returns callback
  */
 export declare const Inject: (abstract: any) => any;

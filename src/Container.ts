@@ -66,6 +66,13 @@ export default class Container {
    */
   private with: Array<any> = [];
 
+  /**
+   * Determine if the given concrete is buildable.
+   *
+   * @param  mixed   concrete
+   * @param  string  abstract
+   * @return bool
+   */
   protected isBuildable(concrete, abstract ?: any) {
     return concrete === abstract || typeof concrete === 'function'
   }
@@ -81,7 +88,7 @@ export default class Container {
   /**
    * iterate through each methods and inject dependencies via proxy
    * @param instance instantiated class
-   * @returns fully dependency injected instantiated class
+   * @return fully dependency injected instantiated class
    */
   injectMethodsDependecies(instance) {
     const protos = Object.getPrototypeOf(instance)
@@ -126,7 +133,7 @@ export default class Container {
   /**
    * sorts and returns value created by Inject decorator
    * @param args arguments from Inject decorator
-   * @returns array
+   * @return array
    */
   sortAndGetArguments(args: Array<any>) {
     return Array.isArray(args)
@@ -215,6 +222,13 @@ export default class Container {
     return newInstance
   }
 
+  /**
+   * Resolve the given type from the container.
+   *
+   * @param  string  abstract
+   * @param  array  parameters
+   * @return mixed
+   */
   resolve(abstract, params = []) {
     abstract = this.getAlias(abstract)
 
@@ -243,6 +257,12 @@ export default class Container {
     return obj
   }
 
+  /**
+   * Get the concrete type for a given abstract.
+   *
+   * @param  string  abstract
+   * @return mixed   concrete
+   */
   getConcrete(abstract) {
     let concrete = this.getContextualConcrete(abstract)
 
@@ -300,6 +320,13 @@ export default class Container {
     this.abstractAliases[abstract].push(alias)
   }
 
+  /**
+   * Resolve the given type from the container.
+   *
+   * @param  string  abstract
+   * @param  array  parameters
+   * @return mixed
+   */
   make(abstract, params = []) {
     return this.resolve(abstract)
   }
@@ -328,13 +355,16 @@ export default class Container {
 
   bound(abstract) {
     return !!this.bindings[abstract] ||
-           !!this.instances[abstract] ||
-           this.isAlias(abstract)
+      !!this.instances[abstract] ||
+      this.isAlias(abstract)
   }
 
   isShared(abstract) {
-    return !!this.instances[abstract] || (
-      !!this.bindings[abstract] && !!this.bindings[abstract].shared)
+    return !!this.instances[abstract] || 
+      (
+        !!this.bindings[abstract] &&
+        !!this.bindings[abstract].shared
+      )
   }
 
   resolved(abstract) {
@@ -343,6 +373,14 @@ export default class Container {
     }
 
     return !!this._resolved[abstract] || !!this.instances[abstract]
+  }
+
+  get(id) {
+    if (this.bound(id)) {
+      return this.resolve(id)
+    }
+
+    throw new Error('Entry not found')
   }
 
   /**
@@ -422,9 +460,9 @@ export default class Container {
 }
 
 /**
- * Inject dependency.
- * @param service 
- * @returns decorator
+ * Allows us to Inject Dependency as parameter in form of decorator.
+ * @param abstract dependency to be injected
+ * @returns callback
  */
 export const Inject = (abstract) : any => {
   return (target, name, idx) => {

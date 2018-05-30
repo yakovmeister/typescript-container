@@ -1,11 +1,11 @@
 # Typescript Container (IOC)
-> Kinda port of Laravel's illuminate/container to typescript.
+> An attempt to bring illuminate/container familiarity into typescript.
 
 [![Build Status][travis-image]][travis-url]
 [![NPM Version][npm-image]][npm-url]
 [![Downloads Stats][npm-downloads]][npm-url] 
 
-Nub Inversion of Control container highly based on illuminate/container from Laravel. You can think of it as a port of illuminate/container to typescript, however, there's no guarantee that everything would work as it should. This module was designed for typescript and thus I cannot guarantee compatibility with ES6 alone.
+This is a small attempt to bring/port Laravel's IoC container ([illuminate/container](https://github.com/illuminate/container)) to typescript with the help of decorators.
 
 ## Installation
 
@@ -15,9 +15,6 @@ npm i --save typescript-container
 
 ## Known issues / Not working
 
-* ~~Contextual Bindings doesn't work just yet.~~
-* ~~Storing arbitrary values~~
-* Every other stuffs aside from basic functionality.
 * Primitive types as dependency
 * tagging
 * overriding constructor parameters
@@ -42,11 +39,14 @@ injecting dependencies to any other method (other than constructor) also works.
 
 
 ## Release History
+* 0.0.7
+  * arbitrary binding support
+  * arbitrary value store support
+  * flush() added
+  * declaration file (d.ts) added
 * 0.0.3
   * added factory() and singleton()
-* 0.0.2
   * basic contextual binding added
-* 0.0.1
   * basic functionality
 
 ## Meta

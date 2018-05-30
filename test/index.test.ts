@@ -84,6 +84,13 @@ describe('prototype', () => {
     expect(sample).to.eq('hello')
   })
 
+  it('should allow arbitrary bindings', () => {
+    app.instance('sample', SampleClass)
+    const sample = app.make('sample')
+
+    expect(sample).to.eq(SampleClass)
+  })
+
   it('should throw an Error (not instantiable)', () => {
     const bindSomething = () => {
       return app.make('idk')
