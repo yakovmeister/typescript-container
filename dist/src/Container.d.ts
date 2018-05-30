@@ -63,6 +63,9 @@ export default class Container {
      * @returns fully dependency injected instantiated class
      */
     injectMethodsDependecies(instance: any): any;
+    iterateThroughMethods(prototype: any, callback: any): void;
+    prepareDependenciesResolution(target: any, key: any): any[];
+    injectDependency(method: Function, dependencies?: any[]): Function;
     /**
      * sorts and returns value created by Inject decorator
      * @param args arguments from Inject decorator
@@ -111,6 +114,7 @@ export default class Container {
     forgetInstance(abstract: any): void;
     forgetInstances(): void;
     flush(): void;
+    notInstantiable(concrete: any): void;
 }
 /**
  * Inject dependency.

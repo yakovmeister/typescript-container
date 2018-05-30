@@ -76,4 +76,21 @@ describe('prototype', () => {
 
     expect(class1.getChangeMe()).to.eq(class2.getChangeMe())
   })
+
+  it('should store arbitrary values', () => {
+    app.instance('sample', 'hello')
+    const sample = app.make('sample')
+
+    expect(sample).to.eq('hello')
+  })
+
+  it('should throw an Error (not instantiable)', () => {
+    const bindSomething = () => {
+      return app.make('idk')
+    }
+
+    expect(bindSomething).to.throw().and.to.satisfy(error => 
+      !!error.message.match(/^Target \[(.*)\] is not instantiable/)
+    )
+  })
 })

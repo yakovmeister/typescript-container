@@ -109,7 +109,7 @@ function () {
 
     this.resolveClass = function (parameter) {
       if (!isInstantiable(parameter)) {
-        throw new Error("Unable to instantiate [" + parameter + "]");
+        throw new Error("[" + parameter + "] is not instantiable");
       }
 
       return _this.make(parameter);
@@ -138,7 +138,7 @@ function () {
     var _this = this;
 
     var protos = Object.getPrototypeOf(instance);
-    Object.entries(protos).forEach(function (_a) {
+    this.iterateThroughMethods(protos, function (_a) {
       var key = _a[0],
           value = _a[1];
 
@@ -146,19 +146,33 @@ function () {
         return;
       }
 
-      var paramKey = "inject__" + key + "_params";
+      var dependencies = _this.prepareDependenciesResolution(instance, key);
 
-      var params = _this.sortAndGetArguments(instance[paramKey]);
-
-      params = _this.resolveDependencies(params);
-      instance[key] = new Proxy(instance[key], {
-        apply: function apply(target, args, argsList) {
-          return Reflect.apply(target, args, params.concat(argsList));
-        }
-      });
-      delete instance[paramKey];
+      instance[key] = _this.injectDependency(instance[key], dependencies);
     });
     return instance;
+  };
+
+  Container.prototype.iterateThroughMethods = function (prototype, callback) {
+    return Object.entries(prototype).forEach(callback);
+  };
+
+  Container.prototype.prepareDependenciesResolution = function (target, key) {
+    var paramKey = "inject__" + key + "_params";
+    var params = this.sortAndGetArguments(target[paramKey]);
+    return this.resolveDependencies(params);
+  };
+
+  Container.prototype.injectDependency = function (method, dependencies) {
+    if (dependencies === void 0) {
+      dependencies = [];
+    }
+
+    return new Proxy(method, {
+      apply: function apply(target, args, argsList) {
+        return Reflect.apply(target, args, dependencies.concat(argsList));
+      }
+    });
   };
   /**
    * sorts and returns value created by Inject decorator
@@ -229,7 +243,7 @@ function () {
 
   Container.prototype.build = function (concrete) {
     if (!isInstantiable(concrete)) {
-      return;
+      return this.notInstantiable(concrete);
     }
 
     this.buildStack.push(concrete);
@@ -451,6 +465,19 @@ function () {
     this.bindings = [];
     this.instances = [];
     this.abstractAliases = [];
+  };
+
+  Container.prototype.notInstantiable = function (concrete) {
+    var message = '';
+
+    if (!!this.buildStack) {
+      var previous = this.buildStack.join(', ');
+      message = "Target [" + concrete + "] is not instantiable while building [" + previous + "].";
+    } else {
+      message = "Target [" + concrete + "] is not instantiable.";
+    }
+
+    throw new Error(message);
   };
 
   return Container;

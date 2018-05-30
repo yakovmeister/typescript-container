@@ -16,7 +16,7 @@ npm i --save typescript-container
 ## Known issues / Not working
 
 * ~~Contextual Bindings doesn't work just yet.~~
-* Storing arbitrary values
+* ~~Storing arbitrary values~~
 * Every other stuffs aside from basic functionality.
 * Primitive types as dependency
 * tagging
@@ -27,48 +27,18 @@ npm i --save typescript-container
 
 You can start by requiring the ioc container then do your thing.
 
-```javascript
-const Container = require('typescript-container')
-const Inject = Container.Inject
-const WithDependencies = require('./src/WithDependencies')
-const Dependency = require('./src/Dependency')
+src/index.ts:
+![index](./images/index.png)
+src/Pokemon.ts:
+![pokemon](./images/pokemon.png)
+src/Character.ts:
+![character](./images/character.png)
+src/Map.ts:
+![map](./images/map.png)
+src/Monster.ts:
+![monster](./images/monster.png)
 
-const app = Container.getInstance()
-
-app.alias(Dependency, 'dependency')
-
-const withDependencies = app.make(WithDependencies)
-
-withDependencies.doStuff()
-
-/********************************************/
-// ./src/WithDependencies
-const Inject = require('typescript-container').Inject
-
-class WithDependencies {
-  dep;
-
-  constructor(@Inject('dependency') dep) {
-    this.dep = dep
-  }
-
-  doStuff() {
-    return this.dep.doSomething()
-  }
-}
-
-/********************************************/
-// ./src/Dependency
-class Dependency {
-  doSomething() {
-    return 'hello'
-  }
-}
-
-
-```  
-
-injecting dependencies to any other method also works.
+injecting dependencies to any other method (other than constructor) also works.
 
 
 ## Release History

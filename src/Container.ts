@@ -86,30 +86,41 @@ export default class Container {
   injectMethodsDependecies(instance) {
     const protos = Object.getPrototypeOf(instance)
 
-    Object.entries(protos)
-      .forEach(([key, value]) => {
-        if (typeof value !== 'function') {
-          return
-        }
+    this.iterateThroughMethods(protos, ([key, value]) => {
+      if (typeof value !== 'function') {
+        return
+      }
 
-        const paramKey = `inject__${key}_params`
+      const dependencies = this.prepareDependenciesResolution(instance, key)
+      
+      instance[key] = this.injectDependency(instance[key], dependencies)
+    })
 
-        let params = this.sortAndGetArguments(
-          instance[paramKey]
-        )
+    return instance
+  }
 
-        params = this.resolveDependencies(params)
+  iterateThroughMethods(prototype, callback) {
+    return Object
+      .entries(prototype)
+      .forEach(callback)
+  }
 
-        instance[key] = new Proxy(instance[key], {
-          apply: (target, args, argsList) => {
-            return Reflect.apply(target, args, [...params, ...argsList])
-          }
-        })
+  prepareDependenciesResolution(target, key) {
+    const paramKey = `inject__${key}_params`
 
-        delete instance[paramKey]
-      })
+    const params = this.sortAndGetArguments(
+      target[paramKey]
+    )
 
-      return instance
+    return this.resolveDependencies(params)
+  }
+
+  injectDependency(method: Function, dependencies = []) {
+    return new Proxy(method, {
+      apply: (target, args, argsList) => {
+        return Reflect.apply(target, args, [...dependencies, ...argsList])
+      }
+    })
   }
 
   /**
@@ -148,7 +159,7 @@ export default class Container {
 
   resolveClass = (parameter) => {
     if (!isInstantiable(parameter)) {
-      throw new Error(`Unable to instantiate [${parameter}]`)
+      throw new Error(`[${parameter}] is not instantiable`)
     }
 
     return this.make(parameter)
@@ -186,7 +197,7 @@ export default class Container {
 
   build(concrete) {
     if (!isInstantiable(concrete)) {
-      return
+      return this.notInstantiable(concrete)
     }
 
     this.buildStack.push(concrete)
@@ -267,8 +278,10 @@ export default class Container {
   }
 
   protected findInContextualBindings(abstract) {
-    if (this.contextual[end(this.buildStack)] 
-      && this.contextual[end(this.buildStack)][abstract]) {
+    if (
+      this.contextual[end(this.buildStack)] && 
+      this.contextual[end(this.buildStack)][abstract]
+    ) {
       return this.contextual[end(this.buildStack)][abstract]
     }
   }
@@ -385,13 +398,26 @@ export default class Container {
     this.instances= []
   }
 
-
   flush() {
     this.aliases = []
     this._resolved = []
     this.bindings = []
     this.instances = []
     this.abstractAliases = []
+  }
+
+  notInstantiable(concrete) {
+    let message = ''
+
+    if (!!this.buildStack) {
+      const previous = this.buildStack.join(', ')
+
+      message = `Target [${concrete}] is not instantiable while building [${previous}].`
+    } else {
+      message = `Target [${concrete}] is not instantiable.`
+    }
+
+    throw new Error(message)
   }
 }
 
