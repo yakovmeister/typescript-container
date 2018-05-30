@@ -1,6 +1,7 @@
 import { expect } from 'chai'
 import SampleClass from './src/SampleClass'
 import SampleClass2 from './src/SampleClass2'
+import SampleClass4 from './src/SampleClass4'
 import { SampleClass2 as SC2 } from './src/AnotherFeat/SampleClass2'
 import { SampleClass as ISC } from './src/AnotherFeat/ISampleClass'
 import { SampleClass1 as SC1 } from './src/AnotherFeat/SampleClass1'
@@ -98,6 +99,21 @@ describe('prototype', () => {
 
     expect(bindSomething).to.throw().and.to.satisfy(error => 
       !!error.message.match(/^Target \[(.*)\] is not instantiable/)
+    )
+  })
+
+  it('should require two dependencies', () => {
+    const app4 = app.make(SampleClass4)
+
+    expect(app4.getInstance(1)).to.eq(app4.getInstance(2))
+  })
+
+  it('should not be aliased to self', () => {
+    app.alias(SampleClass, SampleClass)
+    const make = () => app.make(SampleClass)
+
+    expect(make).to.throw().and.to.satisfy(error =>
+      !!error.message.match(/is aliased on it's own.$/)    
     )
   })
 })
