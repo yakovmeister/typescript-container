@@ -25,14 +25,19 @@ npm i --save typescript-container
 You can start by requiring the ioc container then do your thing.
 
 src/index.ts:  
+  
 ![index](https://github.com/yakovmeister/typescript-container/blob/dev/images/index.png?raw=true)  
 src/Pokemon.ts:  
+  
 ![pokemon](https://github.com/yakovmeister/typescript-container/blob/dev/images/pokemon.png?raw=true)  
 src/Character.ts:  
+  
 ![character](https://github.com/yakovmeister/typescript-container/blob/dev/images/character.png?raw=true)  
 src/Map.ts:  
+  
 ![map](https://github.com/yakovmeister/typescript-container/blob/dev/images/map.png?raw=true)  
 src/Monster.ts:  
+  
 ![monster](https://github.com/yakovmeister/typescript-container/blob/dev/images/monster.png?raw=true)  
 
 injecting dependencies to any other method (other than constructor) also works.
