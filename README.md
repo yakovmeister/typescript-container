@@ -1,78 +1,79 @@
-# Product Name
-> Short blurb about what your product does.
+# Typescript Container (IOC)
+> An attempt to bring illuminate/container familiarity into typescript.
 
-[![NPM Version][npm-image]][npm-url]
 [![Build Status][travis-image]][travis-url]
-[![Downloads Stats][npm-downloads]][npm-url]
+[![NPM Version][npm-image]][npm-url]
+[![Downloads Stats][npm-downloads]][npm-url] 
 
-One to two paragraph statement about your product and what it does.
-
-![](header.png)
+This is a small attempt to bring/port Laravel's IoC container ([illuminate/container](https://github.com/illuminate/container)) to typescript with the help of decorators.
 
 ## Installation
 
-OS X & Linux:
-
 ```sh
-npm install my-crazy-module --save
+npm i --save typescript-container
 ```
 
-Windows:
+## Known issues / Not working
 
-```sh
-edit autoexec.bat
-```
+* Primitive types as dependency
+* tagging
+* overriding constructor parameters
+* callback supports
 
-## Usage example
+## Basic Usage  
 
-A few motivating and useful examples of how your product can be used. Spice this up with code blocks and potentially more screenshots.
+You can start by requiring the ioc container then do your thing.
 
-_For more examples and usage, please refer to the [Wiki][wiki]._
+src/index.ts:  
+  
+![index](https://github.com/yakovmeister/typescript-container/blob/dev/images/index.png?raw=true)  
+src/Pokemon.ts:  
+  
+![pokemon](https://github.com/yakovmeister/typescript-container/blob/dev/images/pokemon.png?raw=true)  
+src/Character.ts:  
+  
+![character](https://github.com/yakovmeister/typescript-container/blob/dev/images/character.png?raw=true)  
+src/Map.ts:  
+  
+![map](https://github.com/yakovmeister/typescript-container/blob/dev/images/map.png?raw=true)  
+src/Monster.ts:  
+  
+![monster](https://github.com/yakovmeister/typescript-container/blob/dev/images/monster.png?raw=true)  
 
-## Development setup
+injecting dependencies to any other method (other than constructor) also works.
 
-Describe how to install all development dependencies and how to run an automated test-suite of some kind. Potentially do this for multiple platforms.
-
-```sh
-make install
-npm test
-```
 
 ## Release History
-
-* 0.2.1
-    * CHANGE: Update docs (module code remains unchanged)
-* 0.2.0
-    * CHANGE: Remove `setDefaultXYZ()`
-    * ADD: Add `init()`
-* 0.1.1
-    * FIX: Crash when calling `baz()` (Thanks @GenerousContributorName!)
-* 0.1.0
-    * The first proper release
-    * CHANGE: Rename `foo()` to `bar()`
-* 0.0.1
-    * Work in progress
+* 0.0.7
+  * arbitrary binding support
+  * arbitrary value store support
+  * flush() added
+  * declaration file (d.ts) added
+* 0.0.3
+  * added factory() and singleton()
+  * basic contextual binding added
+  * basic functionality
 
 ## Meta
 
-Your Name – [@YourTwitter](https://twitter.com/dbader_org) – YourEmail@example.com
+Jacob Baring – [@yakovmeister](https://twitter.com/yakovmeister) – so@tfwno.gf
 
-Distributed under the XYZ license. See ``LICENSE`` for more information.
+Distributed under the MIT license. See ``LICENSE`` for more information.
 
-[https://github.com/yourname/github-link](https://github.com/dbader/)
+[https://github.com/yakovmeister/](https://github.com/yakovmeister/)
 
 ## Contributing
 
-1. Fork it (<https://github.com/yourname/yourproject/fork>)
+1. Fork it (<https://github.com/yakovmeister/typescript-container/fork>)
 2. Create your feature branch (`git checkout -b feature/fooBar`)
 3. Commit your changes (`git commit -am 'Add some fooBar'`)
 4. Push to the branch (`git push origin feature/fooBar`)
 5. Create a new Pull Request
 
 <!-- Markdown link & img dfn's -->
-[npm-image]: https://img.shields.io/npm/v/datadog-metrics.svg?style=flat-square
-[npm-url]: https://npmjs.org/package/datadog-metrics
-[npm-downloads]: https://img.shields.io/npm/dm/datadog-metrics.svg?style=flat-square
-[travis-image]: https://img.shields.io/travis/dbader/node-datadog-metrics/master.svg?style=flat-square
-[travis-url]: https://travis-ci.org/dbader/node-datadog-metrics
+[npm-image]: https://img.shields.io/npm/v/typescript-container.svg?style=flat-square
+[npm-url]: https://npmjs.org/package/typescript-container
+[npm-downloads]: https://img.shields.io/npm/dm/typescript-container.svg?style=flat-square
+[travis-image]: https://travis-ci.org/yakovmeister/typescript-container.svg?branch=dev
+[travis-url]: https://travis-ci.org/yakovmeister/typescript-container
 [wiki]: https://github.com/yourname/yourproject/wiki

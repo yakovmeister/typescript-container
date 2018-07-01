@@ -1,13 +1,15 @@
 {
-    "compilerOptions": {
-      "sourceMap": true,
-      "lib": [
-        "es6",
-        "es2017.object"
-      ]
-    },
-    "exclude": [
-      "node_modules"
+  "compilerOptions": {
+    "target": "es3",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "declaration": true,
+    "sourceMap": true,
+    "lib": [
+      "esnext"
     ]
-  }
-  
+  },
+  "exclude": [
+    "node_modules"
+  ]
+}
