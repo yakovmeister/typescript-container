@@ -15,8 +15,8 @@ npm i --save typescript-container
 
 ## Known issues / Not working
 
+* Since stand-alone function doesn't support parameter decorators, Injecting dependencies on function doesn't work.
 * Primitive types as dependency
-* tagging
 * overriding constructor parameters
 * callback supports
 
@@ -44,6 +44,10 @@ injecting dependencies to any other method (other than constructor) also works.
 
 
 ## Release History
+* 0.0.8
+  * added tagging feature
+  * cleanup package (only include /dist folder, package.json and LICENSE)
+  * removed babel from project
 * 0.0.7
   * arbitrary binding support
   * arbitrary value store support

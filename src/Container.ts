@@ -8,63 +8,70 @@ export default class Container {
    *
    * @var static
    */
-  private static instance: Container;
+  protected static instance: Container;
 
   /**
    * An array of the types that have been resolved.
    *
    * @var array
    */
-  private _resolved: Array<any> = [];
+  protected _resolved: Array<any> = [];
 
   /**
    * The container's bindings.
    *
    * @var array
    */
-  private bindings: Array<any> = [];
+  protected bindings: Array<any> = [];
 
   /**
    * The container's shared instances.
    *
    * @var array
    */
-  private instances: Array<any> = [];
+  protected instances: Array<any> = [];
 
   /**
    * The registered type aliases.
    *
    * @var array
    */
-  private aliases: Array<any> = [];
+  protected aliases: Array<any> = [];
 
   /**
    * The stack of concretions currently being built.
    *
    * @var array
    */
-  private buildStack: Array<any> = [];
+  protected buildStack: Array<any> = [];
 
   /**
    * The registered aliases keyed by the abstract name.
    *
    * @var array
    */
-  private abstractAliases: Array<any> = [];
+  protected abstractAliases: Array<any> = [];
 
   /**
    * The contextual binding map.
    *
    * @var array
    */
-  private contextual: Array<any> = [];
+  protected contextual: Array<any> = [];
 
   /**
    * The parameter override stack.
    *
    * @var array
    */
-  private with: Array<any> = [];
+  protected with: Array<any> = [];
+
+  /**
+   * All of the registered tags.
+   *
+   * @var array
+   */
+  protected tags: Array<any> = [];
 
   /**
    * Determine if the given concrete is buildable.
@@ -329,6 +336,48 @@ export default class Container {
    */
   make(abstract, params = []) {
     return this.resolve(abstract)
+  }
+
+
+  /**
+   * Assign a set of tags to a given bindings.
+   * @param abstracts 
+   * @param tags 
+   * @return void
+   */
+  tag(abstracts, tags) {
+    let args : Array<any> = [ ...arguments ]
+
+    tags = Array.isArray(tags) ? tags : args.splice(1)
+
+    tags.forEach(tag => {
+      if (!this.tags[tag]) {
+        this.tags[tag] = []
+      }
+      
+      this.tags[tag] = [
+        ...this.tags[tag],
+        ...abstracts
+      ]
+    })
+  }
+
+  /**
+   * Resolve all of the bindings for a given tag.
+   *
+   * @param  string  $tag
+   * @return array
+   */
+  tagged(tag) {
+    let results = []
+
+    if (!!this.tags[tag]) {
+      this.tags[tag].forEach(abstract => {
+        results.push(this.make(abstract))
+      })
+    }
+
+    return results
   }
 
   singleton(abstract, concrete = null) {

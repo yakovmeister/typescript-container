@@ -1,6 +1,8 @@
 /images
 /test
 /src
-.babelrc
+/.nyc_output
+/.rpt2_cache
 .travis.yml
 rollup.config.js
+tsconfig.json

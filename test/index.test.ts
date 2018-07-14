@@ -5,7 +5,7 @@ import SampleClass4 from './src/SampleClass4'
 import { SampleClass2 as SC2 } from './src/AnotherFeat/SampleClass2'
 import { SampleClass as ISC } from './src/AnotherFeat/ISampleClass'
 import { SampleClass1 as SC1 } from './src/AnotherFeat/SampleClass1'
-import { app, App2 } from './src/App'
+import { app, App2, Inject } from './src/App'
 
 describe('prototype', () => {
   it('should define alias', () => {
@@ -115,5 +115,12 @@ describe('prototype', () => {
     expect(make).to.throw().and.to.satisfy(error =>
       !!error.message.match(/is aliased on it's own.$/)    
     )
+  })
+
+  it('should be taggable', () => {
+    app.tag(SC2, 'tagtest')
+    app.tag(SC1, 'tagtest')
+
+    expect(app.tagged('tagtest').toString()).to.equal([app.make(SC2),app.make(SC1)].toString())
   })
 })
