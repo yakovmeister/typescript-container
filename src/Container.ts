@@ -84,11 +84,13 @@ export default class Container {
     return concrete === abstract || typeof concrete === 'function'
   }
 
-  getDependecies(concrete, key) {
-    return this.sortAndGetArguments(concrete[key])
-  }
-
-  resolveDependencies(dependencies: Array<any>) {
+  /**
+   * Resolve all of the dependencies from the ReflectionParameters.
+   *
+   * @param  array  $dependencies
+   * @return array
+   */
+  protected resolveDependencies(dependencies: Array<any>) {
     let results = [ ...this.with[this.with.length - 1] ]
 
     dependencies.forEach((dependency, index) => {
@@ -163,6 +165,14 @@ export default class Container {
       : []
   }
 
+  /**
+   * Get the alias for an abstract if available.
+   *
+   * @param  string  abstract
+   * @return string
+   *
+   * @throws \Error
+   */
   getAlias(abstract: string) : any {
     if (!this.aliases[abstract]) {
       return abstract
@@ -469,6 +479,12 @@ export default class Container {
     }
   }
 
+  /**
+   * Drop all of the stale instances and aliases.
+   *
+   * @param  string  abstract
+   * @return void
+   */
   dropStaleInstances(abstract) {
     delete this.instances[abstract]
     delete this.aliases[abstract]
@@ -488,6 +504,11 @@ export default class Container {
     this.contextual[concrete][this.getAlias(abstract)] = implementation
   }
 
+  /**
+   * Set the globally available instance of the container.
+   *
+   * @return static
+   */
   static getInstance() {
     if (!Container.instance) {
       Container.instance = new Container()
@@ -496,17 +517,35 @@ export default class Container {
     return Container.instance
   }
 
+  /**
+   * Set the shared instance of the container.
+   *
+   * @param  Container container
+   * @return Container
+   */
   static setInstance(container: Container) {
     Container.instance = container
   }
 
+  /**
+   * Remove a resolved instance from the instance cache.
+   *
+   * @param  string  $abstract
+   * @return void
+   */
   forgetInstance(abstract) {
     delete this.instances[abstract]
   }
 
+  /**
+   * Clear all of the instances from the container.
+   *
+   * @return void
+   */
   forgetInstances() {
-    this.instances= []
+    this.instances = []
   }
+
 
   flush() {
     this.aliases = []
@@ -528,6 +567,10 @@ export default class Container {
     }
 
     throw new Error(message)
+  }
+
+  protected getDependecies(concrete, key) {
+    return this.sortAndGetArguments(concrete[key])
   }
 }
 
