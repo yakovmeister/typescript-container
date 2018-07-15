@@ -89,7 +89,21 @@ export default class Container {
   }
 
   resolveDependencies(dependencies: Array<any>) {
-    return dependencies.map(this.resolveClass)
+    let results = [ ...this.with[this.with.length - 1] ]
+
+    dependencies.forEach((dependency, index) => {
+      if (!results[index]) {
+        results[index] = dependency
+      }
+    })
+
+    return results.map(result => {
+      if (isInstantiable(result)) {
+        return this.resolveClass(result)
+      }
+
+      return result
+    })
   }
 
   /**
@@ -335,9 +349,18 @@ export default class Container {
    * @return mixed
    */
   make(abstract, params = []) {
-    return this.resolve(abstract)
+    return this.resolve(abstract, params)
   }
 
+  /**
+   * Determine if the given dependency has a parameter override.
+   *
+   * @param  \ReflectionParameter  $dependency
+   * @return bool
+   */
+  protected hasParamterOverride(dependency) {
+    return
+  }
 
   /**
    * Assign a set of tags to a given bindings.

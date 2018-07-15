@@ -1,11 +1,12 @@
 # Typescript Container (IOC)
-> An attempt to bring illuminate/container familiarity into typescript.
+> Laravel's famous illuminate/container ported to typescript
 
 [![Build Status][travis-image]][travis-url]
 [![NPM Version][npm-image]][npm-url]
 [![Downloads Stats][npm-downloads]][npm-url] 
 
-This is a small attempt to bring/port Laravel's IoC container ([illuminate/container](https://github.com/illuminate/container)) to typescript with the help of decorators.
+This is a small attempt to bring Laravel's IoC container ([illuminate/container](https://github.com/illuminate/container)) to typescript with the help of decorators.  
+**NOTE:** this module is not compatible with ES (Babel) alone, the reason for that, ES doesn't support parameter decorator.
 
 ## Installation
 
@@ -17,7 +18,6 @@ npm i --save typescript-container
 
 * Since stand-alone function doesn't support parameter decorators, Injecting dependencies on function doesn't work.
 * Primitive types as dependency
-* overriding constructor parameters
 * callback supports
 
 ## Basic Usage  
@@ -44,7 +44,8 @@ injecting dependencies to any other method (other than constructor) also works.
 
 
 ## Release History
-* 0.0.12
+* 0.0.14
+  * Override constructor parameter support
   * added tagging feature
   * cleanup package (only include /dist folder, package.json and LICENSE)
   * removed babel from project

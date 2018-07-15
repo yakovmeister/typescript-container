@@ -123,4 +123,23 @@ describe('prototype', () => {
 
     expect(app.tagged('tagtest').toString()).to.equal([app.make(SC2),app.make(SC1)].toString())
   })
+
+  it('should override constructor params', () => {
+    class NewClass {
+      name
+      id
+      constructor(id, name) {
+        this.id = id
+        this.name = name
+      }
+
+      printMe() {
+        return `${this.id}: ${this.name}`
+      }
+    }
+
+    const assertMe = app.make(NewClass, [1, 'john'])
+
+    expect(assertMe.printMe()).to.eq('1: john')
+  })
 })
