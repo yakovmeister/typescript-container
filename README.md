@@ -44,7 +44,7 @@ injecting dependencies to any other method (other than constructor) also works.
 
 
 ## Release History
-* 0.0.8
+* 0.0.12
   * added tagging feature
   * cleanup package (only include /dist folder, package.json and LICENSE)
   * removed babel from project
